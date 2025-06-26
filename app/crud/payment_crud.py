@@ -1,9 +1,9 @@
-from typing import Sequence
+from typing import Sequence, Any, Coroutine
 
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.enums import PaymentStatus
+from app.models.enums import PaymentStatus, PlanType
 from app.models.payment import Payment
 from app.schemas.payment import PaymentCreate
 
@@ -31,9 +31,8 @@ async def get_payments_by_user(db: AsyncSession, user_telegram_id: int) -> Seque
     )
     return result.scalars().all()
 
-async def update_payment_status(db: AsyncSession, payment_txn_id: int, new_status: PaymentStatus) -> Payment | None:
-    result = await db.execute(select(Payment).where(Payment.payment_txn_id == payment_txn_id)) # type: ignore
-    payment = result.scalar_one_or_none()
+async def update_payment_status(db: AsyncSession, payment_txn_id: str, new_status: PaymentStatus):
+    payment = await db.get(Payment, payment_txn_id)
     if not payment:
         return None
 
@@ -42,6 +41,16 @@ async def update_payment_status(db: AsyncSession, payment_txn_id: int, new_statu
     await db.refresh(payment)
     return payment
 
+async def update_payment_plan(db: AsyncSession, payment_txn_id: str, new_plan: PlanType):
+    payment = await db.get(Payment, payment_txn_id)
+    if payment is None:
+        return None
+    payment.plan = new_plan
+    await db.commit()
+    await db.refresh(payment)
+    return payment
+
+
 async def get_all_payments(db: AsyncSession) -> Sequence[Payment]:
     result = await db.execute(
         select(Payment)
@@ -49,7 +58,7 @@ async def get_all_payments(db: AsyncSession) -> Sequence[Payment]:
     return result.scalars().all()
 
 
-async def delete_payment_by_txn_id(db: AsyncSession, payment_txn_id: int) -> type[Payment] | None:
+async def delete_payment_by_txn_id(db: AsyncSession, payment_txn_id: str) -> type[Payment] | None:
     payment = await db.get(Payment, payment_txn_id)
     if payment is None:
         return None

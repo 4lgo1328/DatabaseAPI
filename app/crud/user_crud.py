@@ -3,17 +3,27 @@ from typing import Sequence
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserGetOrCreate, UserUpdate
+from app.misc.generator import generate_token
 
+async def get_or_create_user(db: AsyncSession, user_data: UserGetOrCreate):
+    user: User | None = await db.get(User, user_data.telegram_id)
+    if user is None:
+        return await create_user(db, UserCreate(**user_data.model_dump()))
+    return user
 
 async def create_user(db: AsyncSession, user_data: UserCreate) -> User:
-    new_user: User = User(**user_data.model_dump())
+    new_user: User = User(**user_data.model_dump(),
+                          personal_public_token=generate_token(user_data.telegram_id))
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
     return new_user
 
-# todo add get user
+async def get_user(db: AsyncSession, telegram_id: int) -> User | None:
+    result = await db.execute(select(User).where(User.telegram_id == telegram_id) )
+    user: User | None = result.scalar_one_or_none()
+    return user
 
 async def update_user(
         db: AsyncSession, telegram_id: int, user_update: UserUpdate
@@ -24,7 +34,7 @@ async def update_user(
     if user is None:
         return None
 
-    for field, value in user_update.model_dump(exclude_unset=True).items():
+    for field, value in user_update.model_dump(exclude_unset=True, exclude_none=True).items():
         setattr(user, field, value)
 
     await db.commit()

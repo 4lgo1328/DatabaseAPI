@@ -31,6 +31,11 @@ class Payment(Base):
         nullable=False
     )
 
+    plan: Mapped[PlanType] = mapped_column(
+        Enum(PlanType),
+        nullable=False
+    )
+
     status: Mapped[PaymentStatus] = mapped_column(
         Enum(PaymentStatus),
         default=PaymentStatus.pending

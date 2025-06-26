@@ -17,6 +17,11 @@ class User(Base):
         unique=True,
         nullable=False
     )
+    phone_number: Mapped[str] = mapped_column(
+        String(20),
+        unique=True,
+        nullable=False
+    )
     telegram_id: Mapped[int] = mapped_column(
         BigInteger,
         unique=True,
@@ -51,4 +56,8 @@ class User(Base):
     assigned_manager_telegram_id: Mapped[int] = mapped_column(
         BigInteger,
         nullable=True
+    )
+    personal_public_token: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False #todo
     )

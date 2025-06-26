@@ -1,13 +1,12 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Sequence
 
-from sqlalchemy import select, desc, delete, update
+from sqlalchemy import select, desc, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.enums import SubscriptionStatus
 from app.models.subscription import Subscription
 from app.models.user import User
-from app.schemas.subscription import SubscriptionRead, SubscriptionCreateByTGID
+from app.schemas.subscription import SubscriptionCreateByTGID
 
 
 async def create_subscription(db: AsyncSession, data: SubscriptionCreateByTGID) -> Subscription:
@@ -22,7 +21,7 @@ async def get_active_subscription(db: AsyncSession, user_telegram_id: int) -> Su
         select(Subscription)
         .where(
             Subscription.user_telegram_id == user_telegram_id,
-            Subscription.end_date >= datetime.utcnow().replace(tzinfo=None)
+            Subscription.end_date >= datetime.now(UTC).replace(tzinfo=None)
         )
         .order_by(desc(Subscription.start_date))
     )

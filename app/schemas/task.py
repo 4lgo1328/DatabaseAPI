@@ -50,3 +50,6 @@ class FileRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+class TaskUID(BaseModel):
+    UID: int

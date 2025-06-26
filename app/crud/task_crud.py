@@ -1,10 +1,10 @@
-from typing import Sequence, Any, Coroutine
+from typing import Sequence
 
-from sqlalchemy import select, Row, RowMapping
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.task import Task, File
-from app.schemas.task import TaskCreate, TaskUpdate, TaskRead
+from app.schemas.task import TaskCreate, TaskUpdate
 from app.schemas.task import FileCreate
 
 async def create_task(db: AsyncSession, data: TaskCreate) -> Task:
@@ -27,13 +27,13 @@ async def get_user_tasks(db: AsyncSession, tg_id: int) -> Sequence[Task] | None:
     return result.scalars().all()
 
 
-async def update_task(db: AsyncSession, task_UID: int, data: TaskUpdate) -> Task | None:
-    task = await get_task_by_id(db, task_UID)
+async def update_task(db: AsyncSession, data: TaskUpdate) -> Task | None:
+    task = await get_task_by_id(db, data.UID)
 
     if not task:
         return None
 
-    for field, value in data.model_dump(exclude_unset=True).items():
+    for field, value in data.model_dump(exclude_unset=True, exclude_none=True).items():
         setattr(task, field, value)
 
     await db.commit()

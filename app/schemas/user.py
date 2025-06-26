@@ -4,11 +4,18 @@ from pydantic import BaseModel
 from typing import Optional
 from app.models.enums import UserRole
 
+class UserGetOrCreate(BaseModel):
+    telegram_id: int
+    username: Optional[str]
+    first_name: Optional[str]
+    phone_number: Optional[str]  # "+79007776655"
+    role: Optional[UserRole] = UserRole.client
 
 class UserCreate(BaseModel):
     telegram_id: int
     username: str
     first_name: str
+    phone_number: str  # "+79007776655"
     role: Optional[UserRole] = UserRole.client
 
 class UserUpdate(BaseModel):
@@ -21,11 +28,13 @@ class UserUpdate(BaseModel):
 class UserRead(BaseModel):
     UID: int
     telegram_id: int
-    username: Optional[str]
-    first_name: Optional[str]
+    username: str
+    first_name: str
     role: UserRole
     created_at: datetime
+    phone_number: str # "+79007776655"
     is_active: bool
+    personal_public_token: str # todo ????
     assigned_manager_telegram_id: Optional[int] = None
 
     class Config:
