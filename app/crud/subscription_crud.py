@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import datetime
 from typing import Sequence
 
 from sqlalchemy import select, desc, delete
@@ -21,7 +21,7 @@ async def get_active_subscription(db: AsyncSession, user_telegram_id: int) -> Su
         select(Subscription)
         .where(
             Subscription.user_telegram_id == user_telegram_id,
-            Subscription.end_date >= datetime.now(UTC).replace(tzinfo=None)
+            Subscription.end_date >= datetime.utcnow()
         )
         .order_by(desc(Subscription.start_date))
     )
