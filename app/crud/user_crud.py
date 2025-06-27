@@ -1,3 +1,4 @@
+from fastapi import Header
 from typing import Sequence
 
 from sqlalchemy import select, delete
@@ -5,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 from app.schemas.user import UserCreate, UserGetOrCreate, UserUpdate
 from app.misc.generator import generate_token
+
 
 async def get_or_create_user(db: AsyncSession, user_data: UserGetOrCreate):
     user: User | None = await db.get(User, user_data.telegram_id)
@@ -64,3 +66,5 @@ async def delete_user(db: AsyncSession, telegram_id: int) -> bool:
     )
     await db.commit()
     return True
+
+

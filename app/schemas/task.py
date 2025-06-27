@@ -13,6 +13,7 @@ class TaskCreate(BaseModel):
 
 
 class TaskUpdate(BaseModel):
+    UID: int
     title: Optional[str] = None
     description: Optional[str] = None
     assistant_id: Optional[int] = None

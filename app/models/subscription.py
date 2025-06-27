@@ -30,7 +30,8 @@ class Subscription(Base):
 
     start_date: Mapped[datetime] = mapped_column(
         TIMESTAMP,
-        nullable=False
+        nullable=False,
+        default=func.now()
     )
     end_date: Mapped[datetime] = mapped_column(
         TIMESTAMP,
