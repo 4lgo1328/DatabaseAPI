@@ -1,5 +1,6 @@
 from fastapi import Header
 from typing import Sequence
+import logging
 
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,6 +42,7 @@ async def update_user(
 
     await db.commit()
     await db.refresh(user)
+    logging.log(logging.INFO, user)
     return user
 
 

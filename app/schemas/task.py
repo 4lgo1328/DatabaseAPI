@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -19,7 +19,12 @@ class TaskUpdate(BaseModel):
     assistant_id: Optional[int] = None
     status: Optional[TaskStatus] = None
     completed_at: Optional[datetime] = None
-
+    @field_validator("completed_at")
+    @classmethod
+    def remove_tz(cls, value: Optional[datetime]) -> Optional[datetime]:
+        if value and value.tzinfo:
+            return value.replace(tzinfo=None)
+        return value
 
 class TaskRead(BaseModel):
     UID: int
@@ -32,8 +37,20 @@ class TaskRead(BaseModel):
     updated_at: datetime
     completed_at: Optional[datetime]
 
+    @field_validator("created_at", "updated_at", "completed_at")
+    @classmethod
+    def remove_tz(cls, value: Optional[datetime]) -> Optional[datetime]:
+        if value and value.tzinfo:
+            return value.replace(tzinfo=None)
+        return value
+
+
+
     class Config:
         from_attributes = True
+
+
+
 
 
 class FileCreate(BaseModel):
@@ -48,6 +65,13 @@ class FileRead(BaseModel):
     uploader_telegram_id: int
     file_url: str
     created_at: datetime
+
+    @field_validator("created_at")
+    @classmethod
+    def remove_tz(cls, value: Optional[datetime]) -> Optional[datetime]:
+        if value and value.tzinfo:
+            return value.replace(tzinfo=None)
+        return value
 
     class Config:
         from_attributes = True

@@ -12,7 +12,10 @@ class SubscriptionCreateByTGID(BaseModel):
 
     @field_validator("start_date", "end_date", mode="before")
     @classmethod
-    def remove_tz(cls, value: datetime) -> datetime:
+    def remove_tz(cls, value: str | datetime) -> datetime:
+        if isinstance(value, str):
+            value = value.replace("Z", "+00:00")
+            value = datetime.fromisoformat(value)
         return value.replace(tzinfo=None) if value.tzinfo else value
 
 class SubscriptionRead(BaseModel):

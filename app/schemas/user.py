@@ -22,7 +22,7 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     first_name: Optional[str] = None
     role: Optional[UserRole] = None
-    assigned_manager_telegram_id: Optional[str] = None
+    assigned_manager_telegram_id: Optional[int] = None
     is_active: Optional[bool] = None
 
 class UserRead(BaseModel):

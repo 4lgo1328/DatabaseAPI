@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,9 +20,10 @@ router = APIRouter(prefix="/payments", tags=["Payments"])
 
 @router.post("/create", response_model=PaymentRead)
 async def create_payment_route(payment_data: PaymentCreate,
-                               db: AsyncSession = Depends(get_db()),
+                               db: AsyncSession = Depends(get_db),
                                token: str = Header(alias="X-Auth-Token")):
-    if not await verify_token(payment_data.user_telegram_id, token):
+    res = await verify_token(db, payment_data.user_telegram_id, token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     result = await create_payment(db, payment_data)
@@ -28,8 +31,8 @@ async def create_payment_route(payment_data: PaymentCreate,
     return result
 
 @router.get("/by_txn_id", response_model=PaymentRead)
-async def get_payment_by_txn_id_route(payment_txn_id: str,
-                                      db: AsyncSession = Depends(get_db()),
+async def get_payment_by_txn_id_route(payment_txn_id: str = Header(alias="Txn-ID"),
+                                      db: AsyncSession = Depends(get_db),
                                       token: str = Header(alias="X-Auth-Token")):
 
     if not payment_txn_id:
@@ -40,19 +43,23 @@ async def get_payment_by_txn_id_route(payment_txn_id: str,
     if payment is None:
         raise HTTPException(status_code=404, detail="Not found")
 
-    if not await verify_token(payment.user_telegram_id, token):
+    logging.log(logging.WARN, f"HERE-->{payment.user_telegram_id}<--")
+
+    res = await verify_token(db, payment.user_telegram_id, token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     return payment
 
 @router.get("/by_user_id", response_model=List[PaymentRead])
 async def get_payments_by_user_route(telegram_id: int = Header(alias="X-Telegram-ID"),
-                                     db: AsyncSession = Depends(get_db()),
+                                     db: AsyncSession = Depends(get_db),
                                      token: str = Header(alias="X-Auth-Token")):
     if not telegram_id:
         raise HTTPException(status_code=401, detail="Telegram id must be passed")
 
-    if not await verify_token(telegram_id, token):
+    res = await verify_token(db, telegram_id, token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     result = await get_payments_by_user(db, telegram_id)
@@ -60,7 +67,7 @@ async def get_payments_by_user_route(telegram_id: int = Header(alias="X-Telegram
 
 @router.put("/update_status", response_model=PaymentRead)
 async def update_payment_status_route(data: PaymentUpdateStatusByTxn,
-                                      db: AsyncSession = Depends(get_db()),
+                                      db: AsyncSession = Depends(get_db),
                                       token: str = Header(alias="X-Auth-Token")):
     if not data.payment_txn_id:
         raise HTTPException(status_code=401, detail="Payment transaction id must be passed")
@@ -72,7 +79,8 @@ async def update_payment_status_route(data: PaymentUpdateStatusByTxn,
     if not payment:
         raise HTTPException(status_code=404, detail="Not found")
 
-    if not await verify_admin_token(token):
+    res = await verify_admin_token(token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     result = await update_payment_status(db, data.payment_txn_id, data.new_status)
@@ -80,7 +88,7 @@ async def update_payment_status_route(data: PaymentUpdateStatusByTxn,
 
 @router.put("/update_plan", response_model=PaymentRead)
 async def update_payment_plan_route(data: PaymentUpdatePlanByTxn,
-                                    db: AsyncSession = Depends(get_db()),
+                                    db: AsyncSession = Depends(get_db),
                                     token: str = Header(alias="X-Auth-Token")):
     if not data.payment_txn_id:
         raise HTTPException(status_code=401, detail="Payment transaction id must be passed")
@@ -93,30 +101,33 @@ async def update_payment_plan_route(data: PaymentUpdatePlanByTxn,
     if not payment:
         raise HTTPException(status_code=404, detail="Not found")
 
-    if not await verify_admin_token(token):
+    res = await verify_admin_token(token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     result = await update_payment_plan(db, data.payment_txn_id, data.new_plan)
     return result
 
 @router.get("/all", response_model=List[PaymentRead])
-async def get_all_payments_route(db: AsyncSession = Depends(get_db()),
+async def get_all_payments_route(db: AsyncSession = Depends(get_db),
                                  token: str = Header(alias="X-Auth-Token")):
-    if not await verify_admin_token(token):
+    res = await verify_admin_token(token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     return await get_all_payments(db)
 
 @router.delete("/delete", response_model=PaymentRead)
 async def delete_payment_route(data: PaymentTxn,
-                               db: AsyncSession = Depends(get_db()),
+                               db: AsyncSession = Depends(get_db),
                                token: str = Header(alias="X-Auth-Token")):
     if not data.payment_txn_id:
         raise HTTPException(status_code=401, detail="Payment transaction id must be passed")
     payment: Payment | None = await get_payment_by_txn_id(db, data.payment_txn_id)
     if not payment:
         raise HTTPException(status_code=404, detail="Not found")
-    if verify_admin_token(token):
+    res = await verify_admin_token(token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
     result = await delete_payment_by_txn_id(db, data.payment_txn_id)
     return result

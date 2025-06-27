@@ -1,19 +1,24 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, APIRouter
 
-from app.api import misc, payments, subscriptions, tasks, users
+from app.api import payments, subscriptions, tasks, users, misc
 import uvicorn
 
 app = FastAPI(
     title="DatabaseAPI",
     version="2.0",
 )
+router = APIRouter()
+
+@router.get("/")
+async def root():
+    return {200: "Database is working"}
+
+app.include_router(router)
 app.include_router(users.router)
 app.include_router(misc.router)
 app.include_router(payments.router)
 app.include_router(subscriptions.router)
 app.include_router(tasks.router)
-
-
 
 
 

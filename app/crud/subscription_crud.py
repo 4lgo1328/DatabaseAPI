@@ -49,7 +49,7 @@ async def delete_subscription(db: AsyncSession, telegram_id: int) -> bool:
         return False
 
     await db.execute(
-        delete(Subscription).where(Subscription.telegram_id == user.telegram_id) # type: ignore
+        delete(Subscription).where(Subscription.user_telegram_id == user.telegram_id) # type: ignore
     )
     await db.commit()
     return True

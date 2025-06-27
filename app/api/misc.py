@@ -14,13 +14,14 @@ from app.db.database import get_db
 from app.core.security import verify_admin_token
 
 
-router = APIRouter(prefix="misc", tags=["Misc"])
+router = APIRouter(prefix="/misc", tags=["Misc"])
 
-@router.get("/confirm subscription", response_model=SubscriptionRead)
+@router.get("/confirm_subscription", response_model=SubscriptionRead)
 async def activate_subscription(data: SubscriptionCreateByTGID,
-                                db: AsyncSession = Depends(get_db()),
+                                db: AsyncSession = Depends(get_db),
                                 token: str = Header(alias="X-Auth-Token")):
-    if not(await verify_admin_token(token)):
+    res = await verify_admin_token(token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     subscription: Subscription = await create_subscription(db, data)

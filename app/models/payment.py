@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import (
-    Integer, String, Enum, DECIMAL, func, DateTime
+    Integer, String, Enum, DECIMAL, func, DateTime, Sequence
 )
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -9,13 +9,17 @@ from sqlalchemy.orm import mapped_column
 from app.models.enums import *
 from app.db.base_class import Base
 
+uid_seq = Sequence("payment_uid_seq")
 
 class Payment(Base):
     __tablename__ = 'payments'
 
     UID: Mapped[int] = mapped_column(
         Integer,
-        autoincrement=True
+        uid_seq,
+        server_default=uid_seq.next_value(),
+        unique=True,
+        nullable=False
     )
     user_telegram_id: Mapped[int] = mapped_column(
         Integer
@@ -32,12 +36,12 @@ class Payment(Base):
     )
 
     plan: Mapped[PlanType] = mapped_column(
-        Enum(PlanType),
+        Enum(PlanType, name="PlanType"),
         nullable=False
     )
 
     status: Mapped[PaymentStatus] = mapped_column(
-        Enum(PaymentStatus),
+        Enum(PaymentStatus, name="PaymentStatus"),
         default=PaymentStatus.pending
     )
 

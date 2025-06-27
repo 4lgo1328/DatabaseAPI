@@ -24,7 +24,7 @@ async def _verify_user_token(db: AsyncSession, telegram_id: int, token: str) -> 
     ts = int(int(ts_encoded) / magic_number)
     if tgid < 10_000 or tgid > 1_000_000_000_000:
         return False
-    if ts < start_time or ts > start_time * 1.5:
+    if ts < start_time or ts > start_time * 2:
         return False
 
     user: User | None = await get_user(db, telegram_id)

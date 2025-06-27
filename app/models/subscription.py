@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import (
-    Integer, Enum, ForeignKey, TIMESTAMP, func, DateTime, String
+    Integer, Enum, ForeignKey, TIMESTAMP, func, DateTime, String, Sequence
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
@@ -10,13 +10,17 @@ from app.models.enums import *
 from app.db.base_class import Base
 from app.models.user import User
 
+uid_seq = Sequence("subscription_uid_seq")
 
 class Subscription(Base):
     __tablename__ = 'subscriptions'
 
     UID: Mapped[int] = mapped_column(
         Integer,
-        autoincrement=True
+        uid_seq,
+        server_default=uid_seq.next_value(),
+        unique=True,
+        nullable=False
     )
     user_telegram_id: Mapped[int] = mapped_column(
         ForeignKey('users.telegram_id',
@@ -24,7 +28,7 @@ class Subscription(Base):
         nullable=False
     )
     plan: Mapped["PlanType"] = mapped_column(
-        Enum(PlanType),
+        Enum(PlanType, name="PlanType"),
         nullable=False
     )
 

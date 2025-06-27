@@ -1,9 +1,10 @@
-from fastapi import Header, HTTPException
+import logging
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.settings import settings
-from app.db import get_db
+from logging import log
 
-from app.misc.dependencies import _verify_user_token
+from app.misc.misc import _verify_user_token
 
 
 INTERNAL_ADMIN_KEY = settings.admin_secret_key
@@ -18,12 +19,15 @@ async def verify_admin_token(public_user_token: str) -> dict[str, str]:
                 user_id="NOT_SPECIFIED",
                 token=public_user_token)
 
-async def verify_token(telegram_id: int, public_user_token: str) -> dict[str, str]:
 
-    res = _verify_user_token(get_db(), telegram_id, public_user_token)
+async def verify_token(db: AsyncSession, telegram_id: int, public_user_token: str) -> dict[str, str]:
+
+    res = await _verify_user_token(db, telegram_id, public_user_token)
     answer = dict()
+    print(res)
+    log(logging.INFO, res)
 
-    if not(res or public_user_token != INTERNAL_ADMIN_KEY):
+    if res == False and public_user_token != INTERNAL_ADMIN_KEY:
         answer.update({
             "status": "FAILED",
             "user_id": str(res),

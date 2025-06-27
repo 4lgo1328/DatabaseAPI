@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Integer, String, BigInteger, Enum, Boolean, func, DateTime
+    Integer, String, BigInteger, Enum, Boolean, func, DateTime, Sequence
 )
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
@@ -7,13 +7,15 @@ from datetime import datetime
 from app.db.base_class import Base
 from app.models.enums import UserRole
 
+uid_seq = Sequence("user_uid_seq")
 
 class User(Base):
     __tablename__ = 'users'
 
     UID: Mapped[int] = mapped_column(
         Integer,
-        autoincrement=True,
+        uid_seq,
+        server_default=uid_seq.next_value(),
         unique=True,
         nullable=False
     )
@@ -59,5 +61,5 @@ class User(Base):
     )
     personal_public_token: Mapped[str] = mapped_column(
         String(255),
-        nullable=False #todo
+        nullable=False
     )

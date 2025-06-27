@@ -38,7 +38,7 @@ class Task(Base):
     )
 
     status: Mapped["TaskStatus"] = mapped_column(
-        Enum("TaskStatus"),
+        Enum(TaskStatus, name="TaskStatus"),
         nullable=False,
         default=TaskStatus.new
     )

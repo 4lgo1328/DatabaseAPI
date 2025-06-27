@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, Header, HTTPException
 
 from app.crud.subscription_crud import *
@@ -11,9 +13,10 @@ router = APIRouter(prefix="/subscriptions", tags=["Subscriptions"])
 
 @router.post("/create", response_model=SubscriptionRead)
 async def create_subscription_route(data: SubscriptionCreateByTGID,
-                                    db: AsyncSession = Depends(get_db()),
+                                    db: AsyncSession = Depends(get_db),
                                     token: str = Header(alias="X-Auth-Token")):
-    if not await verify_token(data.user_telegram_id, token):
+    res = await verify_token(db, data.user_telegram_id, token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     result = await create_subscription(db, data)
@@ -21,29 +24,34 @@ async def create_subscription_route(data: SubscriptionCreateByTGID,
 
 @router.get("/active", response_model=SubscriptionRead)
 async def get_active_subscription_route(telegram_id: int = Header(alias="X-Telegram-ID"),
-                                        db: AsyncSession = Depends(get_db()),
+                                        db: AsyncSession = Depends(get_db),
                                         token: str = Header(alias="X-Auth-Token")):
-    if not await verify_token(telegram_id, token):
+    res = await verify_token(db, telegram_id, token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     result = await get_active_subscription(db, telegram_id)
+    if not result: raise HTTPException(status_code=404, detail="No active subscription found")
     return result
 
-@router.get("/get", response_model=SubscriptionRead)
-async def get_active_subscription_route(telegram_id: int = Header(alias="X-Telegram-ID"),
-                                        db: AsyncSession = Depends(get_db()),
-                                        token: str = Header(alias="X-Auth-Token")):
-    if not await verify_token(telegram_id, token):
+@router.get("/get", response_model=List[SubscriptionRead])
+async def get_subscription_route(telegram_id: int = Header(alias="X-Telegram-ID"),
+                                 db: AsyncSession = Depends(get_db),
+                                 token: str = Header(alias="X-Auth-Token")):
+    res = await verify_token(db, telegram_id, token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     result = await get_user_subscriptions(db, telegram_id)
+    if not result: raise HTTPException(status_code=404, detail="No subscriptions found")
     return result
 
 @router.delete("/delete", response_model=bool)
-async def delete_subscription_route(telegram_id: int = Header(alias="X-Telegram_ID"),
-                                    db: AsyncSession = Depends(get_db()),
+async def delete_subscription_route(telegram_id: int = Header(alias="X-Telegram-ID"),
+                                    db: AsyncSession = Depends(get_db),
                                     token: str = Header(alias="X-Auth-Token")):
-    if not await verify_token(telegram_id.user_telegram_id, token):
+    res = await verify_token(db, telegram_id, token)
+    if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     result = await delete_subscription(db, telegram_id)
