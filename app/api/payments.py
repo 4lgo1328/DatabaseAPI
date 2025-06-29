@@ -118,16 +118,16 @@ async def get_all_payments_route(db: AsyncSession = Depends(get_db),
     return await get_all_payments(db)
 
 @router.delete("/delete", response_model=PaymentRead)
-async def delete_payment_route(data: PaymentTxn,
+async def delete_payment_route(payment_txn_id: str = Header(alias="Txn-ID"),
                                db: AsyncSession = Depends(get_db),
                                token: str = Header(alias="X-Auth-Token")):
-    if not data.payment_txn_id:
+    if not payment_txn_id:
         raise HTTPException(status_code=401, detail="Payment transaction id must be passed")
-    payment: Payment | None = await get_payment_by_txn_id(db, data.payment_txn_id)
+    payment: Payment | None = await get_payment_by_txn_id(db, payment_txn_id)
     if not payment:
         raise HTTPException(status_code=404, detail="Not found")
     res = await verify_admin_token(token)
     if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
-    result = await delete_payment_by_txn_id(db, data.payment_txn_id)
+    result = await delete_payment_by_txn_id(db, payment_txn_id)
     return result
