@@ -14,6 +14,7 @@ router = APIRouter(prefix="/subscriptions", tags=["Subscriptions"])
 async def get_all_subscriptions(db: AsyncSession = Depends(get_db),
                                 token: str = Header(alias="X-Auth-Token")):
     res = await verify_admin_token(token)
+    print(res)
     if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
     result = await get_all_subscriptions(db)
