@@ -16,7 +16,7 @@ async def get_all_subscriptions(db: AsyncSession = Depends(get_db),
     res = await verify_admin_token(token)
     if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
-    result = get_all_subscriptions(db)
+    result = await get_all_subscriptions(db)
     return result
             
 @router.post("/create", response_model=SubscriptionRead)
