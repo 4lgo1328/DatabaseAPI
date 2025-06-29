@@ -11,7 +11,7 @@ from app.core.security import verify_token, verify_admin_token
 router = APIRouter(prefix="/subscriptions", tags=["Subscriptions"])
 
 @router.get("/all", response_model=List[SubscriptionRead])
-async def get_all_subscriptions(db: AsyncSession = Depends(get_db),
+async def get_all_subscriptions_route(db: AsyncSession = Depends(get_db),
                                 token: str = Header(alias="X-Auth-Token")):
     res = await verify_admin_token(token)
     if res.get("status") != "OK":
