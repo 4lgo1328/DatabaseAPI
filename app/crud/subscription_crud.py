@@ -8,6 +8,11 @@ from app.models.subscription import Subscription
 from app.models.user import User
 from app.schemas.subscription import SubscriptionCreateByTGID
 
+async def get_all_subscriptions(db: AsyncSession) -> Sequence[Subscription] | None:
+    result = await db.execute(
+        select(Subscription)
+    )
+    return result.scalars().all()
 
 async def create_subscription(db: AsyncSession, data: SubscriptionCreateByTGID) -> Subscription:
     subscription = Subscription(**data.model_dump())

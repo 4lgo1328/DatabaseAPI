@@ -16,7 +16,7 @@ from app.core.security import verify_admin_token
 
 router = APIRouter(prefix="/misc", tags=["Misc"])
 
-@router.get("/confirm_subscription", response_model=SubscriptionRead)
+@router.post("/confirm_subscription", response_model=SubscriptionRead)
 async def activate_subscription(data: SubscriptionCreateByTGID,
                                 db: AsyncSession = Depends(get_db),
                                 token: str = Header(alias="X-Auth-Token")):

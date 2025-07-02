@@ -6,11 +6,19 @@ from app.crud.subscription_crud import *
 from app.db.database import get_db
 from app.schemas.subscription import SubscriptionRead
 
-from app.core.security import verify_token
+from app.core.security import verify_token, verify_admin_token
 
 router = APIRouter(prefix="/subscriptions", tags=["Subscriptions"])
 
-
+@router.get("/all", response_model=List[SubscriptionRead])
+async def get_all_subscriptions_route(db: AsyncSession = Depends(get_db),
+                                      token: str = Header(alias="X-Auth-Token")):
+    res = await verify_admin_token(token)
+    if res.get("status") != "OK":
+        raise HTTPException(status_code=403, detail="Token is invalid")
+    result = await get_all_subscriptions(db)
+    return result
+            
 @router.post("/create", response_model=SubscriptionRead)
 async def create_subscription_route(data: SubscriptionCreateByTGID,
                                     db: AsyncSession = Depends(get_db),
