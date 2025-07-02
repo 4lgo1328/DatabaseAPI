@@ -37,7 +37,6 @@ class Subscription(Base):
     )
     remaining_minutes: Mapped[int] = mapped_column(
         Integer,
-        default=plan_hrs,
         nullble=False
     )
 

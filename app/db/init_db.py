@@ -5,7 +5,6 @@ from app.db.database import engine
 from app.db.base_class import Base
 from dotenv import load_dotenv
 import asyncpg # -----| DO NOT REMOVE THIS LINE |-----
-
 from app.db.base import * # -----| DO NOT REMOVE THIS LINE |-----
 
 
