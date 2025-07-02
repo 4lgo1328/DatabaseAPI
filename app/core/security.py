@@ -1,8 +1,6 @@
-import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.settings import settings
-from logging import log
 
 from app.misc.misc import _verify_user_token
 
@@ -24,8 +22,6 @@ async def verify_token(db: AsyncSession, telegram_id: int, public_user_token: st
 
     res = await _verify_user_token(db, telegram_id, public_user_token)
     answer = dict()
-    print(res)
-    log(logging.INFO, res)
 
     if res == False and public_user_token != INTERNAL_ADMIN_KEY:
         answer.update({

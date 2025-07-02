@@ -9,6 +9,7 @@ class UserRole(str, enum.Enum):
     assistant = 'assistant'
     manager = 'manager'
 
+
 class PlanType(str, enum.Enum):
     """
     Enum representing tariff type
@@ -16,6 +17,13 @@ class PlanType(str, enum.Enum):
     light = 'light'
     business = 'business'
     extra = 'extra'
+
+
+class PlanTime(str, enum.Enum):
+    two = 'two',
+    five = 'five',
+    eight = 'eight'
+
 
 class SubscriptionStatus(str, enum.Enum):
     """
@@ -26,6 +34,7 @@ class SubscriptionStatus(str, enum.Enum):
     cancelled = 'cancelled'
     pending_payment = 'pending_payment'
 
+
 class PaymentStatus(str, enum.Enum):
     """
     Enum representing status of a payment
@@ -35,6 +44,7 @@ class PaymentStatus(str, enum.Enum):
     failed = 'failed'
     pending = 'pending'
     refunded = 'refunded'
+
 
 class TaskStatus(str, enum.Enum):
     """

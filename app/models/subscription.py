@@ -31,6 +31,15 @@ class Subscription(Base):
         Enum(PlanType, name="PlanType"),
         nullable=False
     )
+    plan_hrs: Mapped["PlanTime"] = mapped_column(
+        Enum(PlanTime, name="PlanTime"),
+        nullable=False
+    )
+    remaining_minutes: Mapped[int] = mapped_column(
+        Integer,
+        default=plan_hrs,
+        nullble=False
+    )
 
     start_date: Mapped[datetime] = mapped_column(
         TIMESTAMP,
