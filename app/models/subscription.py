@@ -37,7 +37,7 @@ class Subscription(Base):
     )
     remaining_minutes: Mapped[int] = mapped_column(
         Integer,
-        nullble=False
+        nullable=False
     )
 
     start_date: Mapped[datetime] = mapped_column(
