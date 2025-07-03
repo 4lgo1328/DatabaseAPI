@@ -1,4 +1,4 @@
-from typing import Sequence, Any, Coroutine
+from typing import Sequence
 
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +8,9 @@ from app.models.payment import Payment
 from app.schemas.payment import PaymentCreate
 
 
-async def create_payment(db: AsyncSession, data: PaymentCreate) -> Payment:
+async def create_payment(db: AsyncSession, data: PaymentCreate) -> Payment | None:
+    if data.plan_hrs not in [2,5,8]:
+        return None
     payment = Payment(**data.model_dump())
     db.add(payment)
     await db.commit()

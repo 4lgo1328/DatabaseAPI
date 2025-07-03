@@ -39,6 +39,10 @@ class Payment(Base):
         Enum(PlanType, name="PlanType"),
         nullable=False
     )
+    plan_hrs: Mapped["PlanTime"] = mapped_column(
+        Enum(PlanTime, name="PlanTime"),
+        nullable=False
+    )
 
     status: Mapped[PaymentStatus] = mapped_column(
         Enum(PaymentStatus, name="PaymentStatus"),
