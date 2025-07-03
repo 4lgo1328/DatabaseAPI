@@ -5,7 +5,10 @@ import yookassa
 from yookassa import Payment
 from yookassa.domain.exceptions import NotFoundError
 from yookassa.domain.response import PaymentResponse
+from yookassa import Configuration
 
+from app.core.settings import settings
+Configuration.configure(account_id=settings.shop_id, secret_key=settings.token)
 from app.crud.subscription_crud import *
 from app.db.database import get_db
 from app.schemas.subscription import SubscriptionRead

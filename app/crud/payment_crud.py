@@ -9,8 +9,6 @@ from app.schemas.payment import PaymentCreate
 
 
 async def create_payment(db: AsyncSession, data: PaymentCreate) -> Payment | None:
-    if data.plan_hrs not in [2,5,8]:
-        return None
     payment = Payment(**data.model_dump())
     db.add(payment)
     await db.commit()
