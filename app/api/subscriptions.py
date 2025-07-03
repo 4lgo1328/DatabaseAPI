@@ -8,7 +8,6 @@ from yookassa.domain.response import PaymentResponse
 from yookassa import Configuration
 
 from app.core.settings import settings
-Configuration.configure(account_id=settings.shop_id, secret_key=settings.token)
 from app.crud.subscription_crud import *
 from app.db.database import get_db
 from app.schemas.subscription import SubscriptionRead
@@ -33,12 +32,6 @@ async def create_subscription_route(data: SubscriptionCreateByTGID,
     res = await verify_token(db, data.user_telegram_id, token)
     if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
-    try:
-        payment: PaymentResponse = Payment.find_one(data.payment_txn_id)
-    except NotFoundError as e:
-        raise HTTPException(status_code=404, detail="Payment not found")
-    if not (payment.status == "succeeded") or not (payment.paid == False):
-        raise HTTPException(status_code=400, detail="Payment is not succeeded")
 
     result = await create_subscription(db, data)
     return result
