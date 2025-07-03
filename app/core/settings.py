@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     token: str
     shop_id: int
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file="app/.env", env_file_encoding="utf-8")
 
     def __init__(self, **data):
         super().__init__(**data)
