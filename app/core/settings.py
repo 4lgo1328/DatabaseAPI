@@ -8,11 +8,9 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int
     token: str
     shop_id: int
+    yookassa_api_key: str
 
-    model_config = SettingsConfigDict(env_file="app/.env", env_file_encoding="utf-8")
-
-    def __init__(self, **data):
-        super().__init__(**data)
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
 settings = Settings()
