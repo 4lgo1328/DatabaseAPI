@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, BigInteger, Float, ForeignKey
 from app.db.base_class import Base
 
 
-class AssistantStatistics(Base):
+class AssistantStatistics(Base): # todo сделай тут foreign key к юзеру и relation соответственно, также сделай названия попонятнее пж, обозначь минуты где надо, столбцы сделай через Mapped column, как в других
     __tablename__ = "assistant_statistics"
 
     telegram_id = Column(BigInteger, primary_key=True, index=True)

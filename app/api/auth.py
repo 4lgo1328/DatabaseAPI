@@ -18,7 +18,7 @@ async def prepare_login():
     return {"code": code}
 
 
-class LoginConfirmRequest(BaseModel):
+class LoginConfirmRequest(BaseModel): # todo перенеси в модели пж новым файлом
     code: str
     telegram_id: int
     first_name: str
@@ -55,7 +55,7 @@ async def check_status(code: str):
             db,
             telegram_id=user_data["id"],
             username=user_data["username"],
-            first_name=user_data["first_name"]
+            first_name=user_data["first_name"] # ERROR тут должна передаваться модель, а не аргументы todo
         )
 
     token = create_jwt_token(user.telegram_id)
@@ -67,7 +67,7 @@ async def check_status(code: str):
         "username": user.username
     }
 
-class TelegramCallbackRequest(BaseModel):
+class TelegramCallbackRequest(BaseModel):  # todo перенеси в модели пж новым файлом
     code: str
     id: int
     first_name: str

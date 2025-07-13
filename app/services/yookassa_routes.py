@@ -3,7 +3,7 @@ from app.services.yookassa import create_yookassa_payment
 
 router = APIRouter(prefix="/yookassa", tags=["YooKassa"])
 
-@router.post("/create-payment")
+@router.post("/create-payment") # routes - в руты # todo
 async def create_payment(amount: float, user_telegram_id: int):
     try:
         payment_url = create_yookassa_payment(amount, user_telegram_id)

@@ -1,13 +1,6 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, Header, HTTPException
-import yookassa
-from yookassa import Payment
-from yookassa.domain.exceptions import NotFoundError
-from yookassa.domain.response import PaymentResponse
-from yookassa import Configuration
-
-from app.core.settings import settings
 from app.crud.subscription_crud import *
 from app.db.database import get_db
 from app.schemas.subscription import SubscriptionRead
