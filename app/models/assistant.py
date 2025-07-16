@@ -1,14 +1,24 @@
-from sqlalchemy import Column, Integer, BigInteger, Float, ForeignKey
+from sqlalchemy import Integer, BigInteger, Float, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base_class import Base
 
-
-class AssistantStatistics(Base): # todo сделай тут foreign key к юзеру и relation соответственно, также сделай названия попонятнее пж, обозначь минуты где надо, столбцы сделай через Mapped column, как в других
+class AssistantStatistics(Base):
     __tablename__ = "assistant_statistics"
 
-    telegram_id = Column(BigInteger, primary_key=True, index=True)
-    clients = Column(Integer, nullable=False)
-    tasks_completed = Column(Integer, nullable=False)
-    avg_completion_time = Column(Integer, default=0)
-    task_completion_percent = Column(Float, default=0.0)
-    time_overall = Column(Integer, default=0)
-    time_occupied = Column(Integer, default=0)
+    telegram_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("users.telegram_id"),
+        primary_key=True,
+        index=True
+    )
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="assistant_statistics"
+    )
+
+    clients_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    tasks_completed: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    avg_completion_time_minutes: Mapped[int] = mapped_column(Integer, default=0)
+    task_completion_percent: Mapped[float] = mapped_column(Float, default=0.0)
+    time_overall_minutes: Mapped[int] = mapped_column(Integer, default=0)
+    time_occupied_minutes: Mapped[int] = mapped_column(Integer, default=0)

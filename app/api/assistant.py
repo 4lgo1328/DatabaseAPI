@@ -14,7 +14,9 @@ async def create_or_update_assistant_stats(
     db: AsyncSession = Depends(get_db),
     x_auth_key: str = Header(...)
 ):
-    verify_admin_token(x_auth_key) # 1 - ERROR это корутина, ее надо авайтить, 2 - оно возвращает dict, посмотри как это делается в security, сделай для всех новых рутов todo
+    auth = await verify_admin_token(x_auth_key)
+    if auth["status"] != "OK":
+        raise HTTPException(status_code=403, detail="Invalid admin token")
     return await assistant_crud.create_or_update_assistant_stats(db, stats)
 
 
@@ -24,7 +26,9 @@ async def get_assistant_stats(
     db: AsyncSession = Depends(get_db),
     x_auth_key: str = Header(...)
 ):
-    verify_admin_token(x_auth_key) # todo
+    auth = await verify_admin_token(x_auth_key)
+    if auth["status"] != "OK":
+        raise HTTPException(status_code=403, detail="Invalid admin token")
     stats = await assistant_crud.get_assistant_stats_by_telegram_id(db, telegram_id)
     if not stats:
         raise HTTPException(status_code=404, detail="Stats not found")
@@ -37,7 +41,9 @@ async def calculate_and_update_assistant_stats(
     db: AsyncSession = Depends(get_db),
     x_auth_key: str = Header(...)
 ):
-    verify_admin_token(x_auth_key) # todo
+    auth = await verify_admin_token(x_auth_key)
+    if auth["status"] != "OK":
+        raise HTTPException(status_code=403, detail="Invalid admin token")
     stats = await assistant_crud.calculate_and_update_task_stats(db, telegram_id)
     if not stats:
         raise HTTPException(status_code=404, detail="No completed tasks or assistant not found")

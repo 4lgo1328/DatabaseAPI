@@ -1,7 +1,7 @@
 from sqlalchemy import (
     Integer, String, BigInteger, Enum, Boolean, func, DateTime, Sequence
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 
 from app.db.base_class import Base
@@ -62,4 +62,9 @@ class User(Base):
     personal_public_token: Mapped[str] = mapped_column(
         String(255),
         nullable=False
+    )
+    assistant_statistics: Mapped["AssistantStatistics"] = relationship(
+        "AssistantStatistics",
+        back_populates="user",
+        uselist=False
     )
