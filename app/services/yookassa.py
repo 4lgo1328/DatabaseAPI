@@ -2,7 +2,7 @@ from yookassa import Payment, Configuration
 from app.core.settings import settings
 import uuid
 
-Configuration.account_id = settings.admin_secret_key
+Configuration.account_id = settings.shop_id
 Configuration.secret_key = settings.yookassa_api_key
 
 def create_yookassa_payment(

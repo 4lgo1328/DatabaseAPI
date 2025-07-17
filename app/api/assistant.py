@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import verify_admin_token
 from app.db.database import get_db
-from app.schemas.assistant import AssistantStatsCreate, AssistantStatsRead
+from app.schemas.assistant import AssistantStatsCreate, AssistantStatsRead, AssistantStatsUpdate
 from app.crud import assistant_crud
 
 router = APIRouter(prefix="/assistant-statistics", tags=["AssistantStatistics"])
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/assistant-statistics", tags=["AssistantStatistics"])
 async def create_or_update_assistant_stats(
     stats: AssistantStatsCreate,
     db: AsyncSession = Depends(get_db),
-    x_auth_key: str = Header(...)
+    x_auth_key: str = Header(alias="X-Auth-Key")
 ):
     auth = await verify_admin_token(x_auth_key)
     if auth["status"] != "OK":
@@ -24,7 +24,7 @@ async def create_or_update_assistant_stats(
 async def get_assistant_stats(
     telegram_id: int,
     db: AsyncSession = Depends(get_db),
-    x_auth_key: str = Header(...)
+    x_auth_key: str = Header(alias="X-Auth-Key")
 ):
     auth = await verify_admin_token(x_auth_key)
     if auth["status"] != "OK":
@@ -39,7 +39,7 @@ async def get_assistant_stats(
 async def calculate_and_update_assistant_stats(
     telegram_id: int,
     db: AsyncSession = Depends(get_db),
-    x_auth_key: str = Header(...)
+    x_auth_key: str = Header(alias="X-Auth-Key")
 ):
     auth = await verify_admin_token(x_auth_key)
     if auth["status"] != "OK":

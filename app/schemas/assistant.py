@@ -23,3 +23,14 @@ class AssistantStatsRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+
+class AssistantStatsUpdate(BaseModel):
+    telegram_id: int
+    clients_count: Optional[int]
+    tasks_completed: Optional[int]
+    avg_completion_time_minutes: Optional[float]
+    task_completion_percent: Optional[float]
+    time_overall_minutes: Optional[int]
+    time_occupied_minutes: Optional[int]

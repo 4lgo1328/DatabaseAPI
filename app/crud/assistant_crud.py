@@ -4,13 +4,13 @@ from sqlalchemy import select, func
 from app.models.user import User
 from app.models.task import Task
 from app.models.assistant import AssistantStatistics
-from app.schemas.assistant import AssistantStatsCreate
+from app.schemas.assistant import AssistantStatsCreate, AssistantStatsUpdate
 
 
 async def create_or_update_assistant_stats(db: AsyncSession, data: AssistantStatsCreate) -> AssistantStatistics:
     stats = await db.get(AssistantStatistics, data.telegram_id)
     if stats:
-        for field, value in data.model_dump(exclude_unset=True).items():
+        for field, value in data.model_dump(exclude_unset=True, exclude_defaults=True).items():
             setattr(stats, field, value)
     else:
         stats = AssistantStatistics(**data.model_dump())
@@ -27,13 +27,13 @@ async def get_assistant_stats_by_telegram_id(db: AsyncSession, telegram_id: int)
 
 async def calculate_and_update_task_stats(db: AsyncSession, telegram_id: int) -> AssistantStatistics | None:
     user = await db.execute(select(User).where(User.telegram_id == telegram_id))
-    user = user.scalar_one_or_none()
-    if not user:
+    user_found: User = user.scalar_one_or_none()
+    if not user_found:
         return None
 
     result = await db.execute(
         select(Task)
-        .where(Task.assistant_id == user.id, Task.status == "completed")
+        .where(Task.assistant_id == user_found.telegram_id, Task.status == "completed")
     )
     tasks = result.scalars().all()
 
