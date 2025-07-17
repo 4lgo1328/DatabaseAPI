@@ -1,4 +1,6 @@
 from yookassa import Payment, Configuration
+from yookassa.domain.response import PaymentResponse
+
 from app.core.settings import settings
 import uuid
 
@@ -9,8 +11,8 @@ def create_yookassa_payment(
     amount: float,
     telegram_id: int,
     return_url: str
-) -> str:
-    payment = Payment.create({
+) -> dict[str, str]:
+    payment: PaymentResponse = Payment.create({
         "amount": {
             "value": f"{amount:.2f}",
             "currency": "RUB"
@@ -23,4 +25,4 @@ def create_yookassa_payment(
         "description": f"Оплата от пользователя {telegram_id}"
     }, uuid.uuid4())
 
-    return payment.confirmation.confirmation_url
+    return {"confirmation_url": payment.confirmation.confirmation_url, "transaction_id": payment.id}

@@ -1,6 +1,8 @@
 from sqlalchemy import Integer, BigInteger, Float, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base_class import Base
+from app.models.user import User
+
 
 class AssistantStatistics(Base):
     __tablename__ = "assistant_statistics"
