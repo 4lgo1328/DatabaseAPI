@@ -63,8 +63,17 @@ class User(Base):
         String(255),
         nullable=False
     )
+    city: Mapped[str] = mapped_column(
+        String(255),
+        nullable=True
+    )
     assistant_statistics: Mapped["AssistantStatistics"] = relationship(
         "AssistantStatistics",
         back_populates="user",
         uselist=False
     )
+    has_free_task: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True
+    )
+
