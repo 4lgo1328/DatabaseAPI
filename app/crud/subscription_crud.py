@@ -1,5 +1,4 @@
 from datetime import datetime
-from idlelib.debugobj_r import remote_object_tree_item
 from typing import Sequence
 
 from sqlalchemy import select, desc, delete
