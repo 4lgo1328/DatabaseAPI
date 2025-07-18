@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 
 from app.db.base_class import Base
+from app.models.assistant import AssistantStatistics
 from app.models.enums import UserRole
 
 uid_seq = Sequence("user_uid_seq")

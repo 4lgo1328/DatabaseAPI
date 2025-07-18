@@ -9,7 +9,8 @@ class AssistantStatistics(Base):
 
     telegram_id: Mapped[int] = mapped_column(
         BigInteger,
-        ForeignKey("users.telegram_id"),
+        ForeignKey("users.telegram_id",
+                   ondelete="CASCADE"),
         primary_key=True,
         index=True
     )
@@ -24,3 +25,4 @@ class AssistantStatistics(Base):
     task_completion_percent: Mapped[float] = mapped_column(Float, default=0.0)
     time_overall_minutes: Mapped[int] = mapped_column(Integer, default=0)
     time_occupied_minutes: Mapped[int] = mapped_column(Integer, default=0)
+    kudos: Mapped[int] = mapped_column(Integer, default=0)

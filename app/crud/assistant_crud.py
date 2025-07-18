@@ -19,7 +19,66 @@ async def create_or_update_assistant_stats(db: AsyncSession, data: AssistantStat
     await db.commit()
     await db.refresh(stats)
     return stats
+async def change_clients_count(db: AsyncSession, telegram_id: int, new_clients_number: int) -> AssistantStatistics | None:
+    assistant = await db.execute(select(AssistantStatistics).where(AssistantStatistics.telegram_id == telegram_id))
+    assistant_found: AssistantStatistics | None = assistant.scalar_one_or_none()
+    if assistant_found is None:
+        return None
+    assistant_found.clients_count = new_clients_number
+    await db.commit()
+    await db.refresh(assistant_found)
+    return assistant_found
 
+async def kudos_assistant(db: AsyncSession, telegram_id: int) -> AssistantStatistics | None:
+    assistant = await db.execute(select(AssistantStatistics).where(AssistantStatistics.telegram_id == telegram_id))
+    assistant_found: AssistantStatistics | None = assistant.scalar_one_or_none()
+    if assistant_found is None:
+        return None
+    assistant_found.kudos += 1
+    await db.commit()
+    await db.refresh(assistant_found)
+    return assistant_found
+
+async def increment_assistant_task(db: AsyncSession, telegram_id: int):
+    assistant = await db.execute(select(AssistantStatistics).where(AssistantStatistics.telegram_id == telegram_id))
+    assistant_found: AssistantStatistics | None = assistant.scalar_one_or_none()
+    if assistant_found is None:
+        return None
+    assistant_found.tasks_completed += 1
+    await db.commit()
+    await db.refresh(assistant_found)
+    return assistant_found
+
+async def add_client_to_assistant(db: AsyncSession, telegram_id: int):
+    assistant = await db.execute(select(AssistantStatistics).where(AssistantStatistics.telegram_id == telegram_id))
+    assistant_found: AssistantStatistics | None = assistant.scalar_one_or_none()
+    if assistant_found is None:
+        return None
+    assistant_found.clients_count += 1
+    await db.commit()
+    await db.refresh(assistant_found)
+    return assistant_found
+
+async def change_occupied_time(db: AsyncSession, telegram_id: int, new_occupied_time: int):
+    assistant = await db.execute(select(AssistantStatistics).where(AssistantStatistics.telegram_id == telegram_id))
+    assistant_found: AssistantStatistics | None = assistant.scalar_one_or_none()
+    if assistant_found is None:
+        return None
+    assistant_found.time_occupied_minutes = new_occupied_time
+    await db.commit()
+    await db.refresh(assistant_found)
+    return assistant_found
+
+
+async def change_overall_minutes(db: AsyncSession, telegram_id: int, new_overall_time: int):
+    assistant = await db.execute(select(AssistantStatistics).where(AssistantStatistics.telegram_id == telegram_id))
+    assistant_found: AssistantStatistics | None = assistant.scalar_one_or_none()
+    if assistant_found is None:
+        return None
+    assistant_found.time_overall_minutes = new_overall_time
+    await db.commit()
+    await db.refresh(assistant_found)
+    return assistant_found
 
 async def get_assistant_stats_by_telegram_id(db: AsyncSession, telegram_id: int) -> AssistantStatistics | None:
     return await db.get(AssistantStatistics, telegram_id)

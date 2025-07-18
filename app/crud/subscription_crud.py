@@ -1,9 +1,11 @@
 from datetime import datetime
+from idlelib.debugobj_r import remote_object_tree_item
 from typing import Sequence
 
 from sqlalchemy import select, desc, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.enums import PlanType, PlanTime
 from app.models.subscription import Subscription
 from app.models.user import User
 from app.schemas.subscription import SubscriptionCreateByTGID
@@ -41,6 +43,31 @@ async def get_user_subscriptions(db: AsyncSession, user_telegram_id: int) -> Seq
     )
     return result.scalars().all()
 
+async def update_subscription_plan(db: AsyncSession, user_telegram_id: int, new_plan: PlanType) -> Subscription | None:
+    result = await db.execute(select(Subscription).where(Subscription.user_telegram_id == user_telegram_id))
+    user: User | None = result.scalar_one_or_none()
+    if user is None:
+        return None
+    subscription: Subscription | None = await get_active_subscription(db, user_telegram_id)
+    if subscription is None:
+        return None
+    subscription.plan = new_plan
+    await db.commit()
+    await db.refresh(Subscription)
+    return subscription
+
+async def update_subscription_plan_hrs(db: AsyncSession, user_telegram_id: int, new_plan_hrs: PlanTime) -> Subscription | None:
+    result = await db.execute(select(Subscription).where(Subscription.user_telegram_id == user_telegram_id))
+    user: User | None = result.scalar_one_or_none()
+    if user is None:
+        return None
+    subscription: Subscription | None = await get_active_subscription(db, user_telegram_id)
+    if subscription is None:
+        return None
+    subscription.plan_hrs = new_plan_hrs
+    await db.commit()
+    await db.refresh(Subscription)
+    return subscription
 
 async def delete_subscription(db: AsyncSession, telegram_id: int) -> bool:
     result = await db.execute(
