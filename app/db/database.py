@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from app.core.settings import settings
-from base_class import Base
+from app.db.base_class import Base
 
 
 engine = create_async_engine(
