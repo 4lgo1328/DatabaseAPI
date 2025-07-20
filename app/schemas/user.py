@@ -24,6 +24,7 @@ class UserUpdate(BaseModel):
     role: Optional[UserRole] = None
     assigned_manager_telegram_id: Optional[int] = None
     is_active: Optional[bool] = None
+    has_free_task: Optional[bool] = None
 
 class UserRead(BaseModel):
     UID: int
@@ -34,7 +35,8 @@ class UserRead(BaseModel):
     created_at: datetime
     phone_number: str # "+79007776655"
     is_active: bool
-    personal_public_token: str # todo ????
+    personal_public_token: str
+    has_free_task: bool
     assigned_manager_telegram_id: Optional[int] = None
 
     class Config:
