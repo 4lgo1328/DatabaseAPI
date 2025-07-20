@@ -5,7 +5,7 @@ from app.core.security import verify_admin_token
 from app.crud.assistant_crud import change_clients_count, kudos_assistant, increment_assistant_task, \
     add_client_to_assistant, change_occupied_time, change_overall_minutes
 from app.db.database import get_db
-from app.schemas.assistant import AssistantStatsCreate, AssistantStatsRead, AssistantStatsUpdate
+from app.schemas.assistant import AssistantStatsCreate, AssistantStatsRead
 from app.crud import assistant_crud
 
 router = APIRouter(prefix="/assistant-statistics", tags=["AssistantStatistics"])

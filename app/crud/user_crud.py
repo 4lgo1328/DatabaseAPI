@@ -1,4 +1,3 @@
-from fastapi import Header
 from typing import Sequence
 import logging
 

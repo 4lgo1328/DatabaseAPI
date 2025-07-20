@@ -20,9 +20,8 @@ class User(Base):
         nullable=False
     )
     phone_number: Mapped[str] = mapped_column(
-        String(20),
-        unique=True,
-        nullable=False
+        String(255),
+        default="Не указан"
     )
     telegram_id: Mapped[int] = mapped_column(
         BigInteger,

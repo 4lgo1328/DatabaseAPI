@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
 from app.models.payment import Payment
-from app.schemas.payment import PaymentCreate, PaymentRead, PaymentUpdateStatusByTxn, PaymentUpdatePlanByTxn, PaymentTxn
+from app.schemas.payment import PaymentCreate, PaymentRead, PaymentUpdateStatusByTxn, PaymentUpdatePlanByTxn
 from app.crud.payment_crud import (create_payment,
                                    get_payment_by_txn_id,
                                    get_payments_by_user,

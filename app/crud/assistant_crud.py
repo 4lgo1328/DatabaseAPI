@@ -1,10 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select
 
 from app.models.user import User
 from app.models.task import Task
 from app.models.assistant import AssistantStatistics
-from app.schemas.assistant import AssistantStatsCreate, AssistantStatsUpdate
+from app.schemas.assistant import AssistantStatsCreate
 
 
 async def create_or_update_assistant_stats(db: AsyncSession, data: AssistantStatsCreate) -> AssistantStatistics:

@@ -1,13 +1,17 @@
 from fastapi import APIRouter
+from fastapi.params import Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from uuid import uuid4
 
-from app.db.database import AsyncSessionLocal
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.database import get_db
 from app.crud.user_crud import get_or_create_user
+from app.schemas.user import UserGetOrCreate
 from app.util.utils import create_jwt_token
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 login_codes: dict[str, dict] = {}
 
@@ -18,7 +22,7 @@ async def prepare_login():
     return {"code": code}
 
 
-class LoginConfirmRequest(BaseModel): # todo перенеси в модели пж новым файлом
+class LoginConfirmRequest(BaseModel):
     code: str
     telegram_id: int
     first_name: str
@@ -40,7 +44,8 @@ async def confirm_login(data: LoginConfirmRequest):
 
 
 @router.get("/status/{code}")
-async def check_status(code: str):
+async def check_status(code: str,
+                       db: AsyncSession = Depends(get_db)):
     entry = login_codes.get(code)
     if not entry:
         return JSONResponse(status_code=404, content={"detail": "code not found"})
@@ -50,13 +55,12 @@ async def check_status(code: str):
 
     user_data = entry["user"]
 
-    async with AsyncSessionLocal() as db:
-        user = await get_or_create_user(
-            db,
-            telegram_id=user_data["id"],
-            username=user_data["username"],
-            first_name=user_data["first_name"] # ERROR тут должна передаваться модель, а не аргументы todo
-        )
+    data: UserGetOrCreate = UserGetOrCreate(
+        telegram_id=int(user_data["id"]),
+        username=user_data["username"],
+        first_name=user_data["first_name"],
+        phone_number=None)
+    user = await get_or_create_user(db, data)
 
     token = create_jwt_token(user.telegram_id)
 
@@ -67,7 +71,7 @@ async def check_status(code: str):
         "username": user.username
     }
 
-class TelegramCallbackRequest(BaseModel):  # todo перенеси в модели пж новым файлом
+class TelegramCallbackRequest(BaseModel):
     code: str
     id: int
     first_name: str
