@@ -1,13 +1,18 @@
+from fastapi.exceptions import HTTPException
+
 from fastapi import APIRouter
-from fastapi.params import Depends
+from fastapi.params import Depends, Header
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from uuid import uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.security import verify_admin_token
+from app.crud.staff_crud import create_code, issue_code
 from app.db.database import get_db
 from app.crud.user_crud import get_or_create_user
+from app.models.enums import UserRole
 from app.schemas.user import UserGetOrCreate
 from app.util.utils import create_jwt_token
 
@@ -90,3 +95,31 @@ async def telegram_callback(req: TelegramCallbackRequest):
     login_codes[req.code]["status"] = "ok"
 
     return {"status": "success"}
+
+
+@router.post("/create-system-code", response_model=str)
+async def create_system_code(token: str = Header(alias="X-Auth-Token"),
+                             role: str = Header(alias="User-Role"),
+                             db: AsyncSession = Depends(get_db)):
+    auth = await verify_admin_token(token)
+    if auth.get("status") != "OK":
+        raise HTTPException(status_code=403, detail="Invalid auth token")
+    formatted_role: UserRole | None = None
+    match role.lower():
+        case "assistant":
+            formatted_role = UserRole.assistant
+        case "manager":
+            formatted_role = UserRole.manager
+    if formatted_role is None:
+        raise HTTPException(status_code=422, detail="Wrong formattd role given")
+    code: str = await create_code(db, formatted_role)
+    return code
+
+@router.post("/issue-system-code", response_model=str)
+async def issue_system_code(token: str = Header(alias="X-Auth-Token"),
+                            code: str = Header(alias="X-User-Code"),
+                            db: AsyncSession = Depends(get_db)):
+    auth = await verify_admin_token(token)
+    if auth.get("status") != "OK":
+        raise HTTPException(status_code=403, detail="Invalid auth token")
+    return await issue_code(db, code)
