@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, Any, Coroutine
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,6 +13,10 @@ async def create_task(db: AsyncSession, data: TaskCreate) -> Task:
     await db.commit()
     await db.refresh(task)
     return task
+
+async def get_all_tasks(db: AsyncSession) -> Sequence[Task]:
+    result = await db.execute(select(Task))
+    return result.scalars().all()
 
 async def get_task_by_id(db: AsyncSession, task_UID: int) -> Task | None:
     result = await db.execute(select(Task).where(Task.UID == task_UID))

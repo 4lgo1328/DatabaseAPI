@@ -5,11 +5,19 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from app.crud.task_crud import *
 from app.schemas.task import TaskRead
 from app.db.database import get_db
-from app.core.security import verify_token
+from app.core.security import verify_token, verify_admin_token
 from app.crud.subscription_crud import get_active_subscription
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
+
+@router.get("/all", response_model=List[TaskRead])
+async def get_all_tasks_route(db: AsyncSession = Depends(get_db),
+                              token: str = Header(alias="X-Auth-Token")):
+    auth: dict = await verify_admin_token(token)
+    if auth.get("status") != "OK":
+        raise HTTPException(status_code=403, detail="Token is invalid")
+    return get_all_tasks(db)
 
 @router.post("/create", response_model=TaskRead)
 async def create_task_route(data: TaskCreate,
