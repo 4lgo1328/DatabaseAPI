@@ -1,13 +1,10 @@
 from fastapi.exceptions import HTTPException
-
-from fastapi import APIRouter
-from fastapi.params import Depends, Header
+from fastapi import APIRouter, Depends, Header
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from uuid import uuid4
-
+from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.security import verify_admin_token
 from app.crud.staff_crud import create_code, issue_code
 from app.db.database import get_db
@@ -18,12 +15,30 @@ from app.util.utils import create_jwt_token
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-login_codes: dict[str, dict] = {}
+login_codes = {}
+last_cleanup = datetime.now()
+
+
+async def cleanup_codes():
+    global last_cleanup
+    now = datetime.now()
+    if now - last_cleanup > timedelta(minutes=5):
+        expired = [code for code, data in login_codes.items()
+                   if datetime.now() - data["created"] > timedelta(minutes=10)]
+        for code in expired:
+            del login_codes[code]
+        last_cleanup = now
+
 
 @router.post("/prepare-login")
 async def prepare_login():
+    await cleanup_codes()
     code = str(uuid4())
-    login_codes[code] = {"status": "waiting", "user": None}
+    login_codes[code] = {
+        "status": "waiting",
+        "user": None,
+        "created": datetime.now()
+    }
     return {"code": code}
 
 
@@ -33,47 +48,59 @@ class LoginConfirmRequest(BaseModel):
     first_name: str
     username: str
 
+
 @router.post("/confirm")
-async def confirm_login(data: LoginConfirmRequest):
+async def confirm_login(data: LoginConfirmRequest, db: AsyncSession = Depends(get_db)):
+    await cleanup_codes()
+
     if data.code not in login_codes:
-        return {"status": "invalid code"}
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "Invalid code"}
+        )
+
+    user_data = UserGetOrCreate(
+        telegram_id=data.telegram_id,
+        username=data.username,
+        first_name=data.first_name,
+        phone_number=None
+    )
+    user = await get_or_create_user(db, user_data)
+
+    token = create_jwt_token(user.telegram_id)
+
     login_codes[data.code] = {
         "status": "ok",
+        "token": token,
         "user": {
-            "id": data.telegram_id,
-            "first_name": data.first_name,
-            "username": data.username
+            "id": str(user.telegram_id),
+            "first_name": user.first_name,
+            "username": user.username
         }
     }
+
     return {"status": "confirmed"}
 
 
 @router.get("/status/{code}")
-async def check_status(code: str,
-                       db: AsyncSession = Depends(get_db)):
+async def check_status(code: str):
+    await cleanup_codes()
     entry = login_codes.get(code)
+
     if not entry:
-        return JSONResponse(status_code=404, content={"detail": "code not found"})
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "Code not found or expired"}
+        )
 
     if entry["status"] != "ok":
         return {"status": "waiting"}
 
-    user_data = entry["user"]
-
-    data: UserGetOrCreate = UserGetOrCreate(
-        telegram_id=int(user_data["id"]),
-        username=user_data["username"],
-        first_name=user_data["first_name"],
-        phone_number=None)
-    user = await get_or_create_user(db, data)
-
-    token = create_jwt_token(user.telegram_id)
-
     return {
-        "token": token,
-        "id": str(user.telegram_id),
-        "firstName": user.first_name,
-        "username": user.username
+        "token": entry["token"],
+        "id": entry["user"]["id"],
+        "firstName": entry["user"]["first_name"],
+        "username": entry["user"]["username"]
     }
 
 class TelegramCallbackRequest(BaseModel):
@@ -81,21 +108,6 @@ class TelegramCallbackRequest(BaseModel):
     id: int
     first_name: str
     username: str
-
-@router.post("/telegram_callback")
-async def telegram_callback(req: TelegramCallbackRequest):
-    if req.code not in login_codes:
-        return JSONResponse(status_code=404, content={"detail": "Code not found"})
-
-    login_codes[req.code]["user"] = {
-        "id": req.id,
-        "first_name": req.first_name,
-        "username": req.username
-    }
-    login_codes[req.code]["status"] = "ok"
-
-    return {"status": "success"}
-
 
 @router.post("/create-system-code", response_model=str)
 async def create_system_code(token: str = Header(alias="X-Auth-Token"),
