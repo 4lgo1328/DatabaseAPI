@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, Header, HTTPException
-from sqlalchemy import alias
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
