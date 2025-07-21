@@ -41,3 +41,8 @@ class UserRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+class PendingUserRead(BaseModel):
+    telegram_id: int
+    joined_at: datetime
+    reminders_sent: int

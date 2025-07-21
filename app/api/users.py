@@ -3,7 +3,7 @@ from sqlalchemy import alias
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
-from app.schemas.user import UserCreate, UserRead, UserUpdate, UserGetOrCreate
+from app.schemas.user import UserCreate, UserRead, UserUpdate, UserGetOrCreate, PendingUserRead
 from app.crud.user_crud import (create_user,
                                 get_user,
                                 update_user,
@@ -72,7 +72,7 @@ async def delete_user_route(telegram_id: int = Header(alias="X-Telegram-ID"),
     result = await delete_user(db, telegram_id)
     return result
 
-@router.post("/get-or-create-pending")
+@router.post("/get-or-create-pending", response_model=PendingUserRead)
 async def get_or_create_pending_route(db: AsyncSession = Depends(get_db),
                                       token: str = Header(alias="X-Auth-Token"),
                                       telegram_id: int = Header(alias="X-Telegram-ID")):
@@ -80,11 +80,11 @@ async def get_or_create_pending_route(db: AsyncSession = Depends(get_db),
     if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
-    result = get_or_create_pending(db, telegram_id)
+    result = await get_or_create_pending(db, telegram_id)
     return result
 
 
-@router.post("/increment-notification")
+@router.post("/increment-notification", response_model=PendingUserRead)
 async def increment_notification_route(db: AsyncSession = Depends(get_db),
                                       token: str = Header(alias="X-Auth-Token"),
                                       telegram_id: int = Header(alias="X-Telegram-ID")):
@@ -92,5 +92,5 @@ async def increment_notification_route(db: AsyncSession = Depends(get_db),
     if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
-    result = increment_notification(db, telegram_id)
+    result = await increment_notification(db, telegram_id)
     return result
