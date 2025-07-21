@@ -79,6 +79,6 @@ class User(Base):
 class PendingUser(Base):
     __tablename__ = "pending_users"
 
-    telegram_id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    telegram_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
     joined_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     reminders_sent: Mapped[int] = mapped_column(Integer, default=0)

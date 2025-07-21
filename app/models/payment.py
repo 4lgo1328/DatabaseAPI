@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import (
-    Integer, String, Enum, DECIMAL, func, DateTime, Sequence
+    Integer, String, Enum, DECIMAL, func, DateTime, Sequence, BigInteger
 )
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -22,7 +22,7 @@ class Payment(Base):
         nullable=False
     )
     user_telegram_id: Mapped[int] = mapped_column(
-        Integer
+        BigInteger
     )
     payment_txn_id: Mapped[str] = mapped_column(
         String(255),
