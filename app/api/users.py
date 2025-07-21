@@ -76,7 +76,7 @@ async def delete_user_route(telegram_id: int = Header(alias="X-Telegram-ID"),
 async def get_or_create_pending_route(db: AsyncSession = Depends(get_db),
                                       token: str = Header(alias="X-Auth-Token"),
                                       telegram_id: int = Header(alias="X-Telegram-ID")):
-    res = await verify_token(db, telegram_id, token)
+    res = await verify_admin_token(token)
     if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
@@ -88,9 +88,18 @@ async def get_or_create_pending_route(db: AsyncSession = Depends(get_db),
 async def increment_notification_route(db: AsyncSession = Depends(get_db),
                                       token: str = Header(alias="X-Auth-Token"),
                                       telegram_id: int = Header(alias="X-Telegram-ID")):
-    res = await verify_token(db, telegram_id, token)
+    res = await verify_admin_token(token)
     if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
 
     result = await increment_notification(db, telegram_id)
+    return result
+
+@router.get("/get-all-pending", response_model=List[PendingUserRead])
+async def get_all_pending(db: AsyncSession = Depends(get_db),
+                          token: str = Header(alias="X-Auth-Token")):
+    res = await verify_admin_token(token)
+    if res.get("status") != "OK":
+        raise HTTPException(status_code=403, detail="Token is invalid")
+    result = await get_all_pending(db)
     return result

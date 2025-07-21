@@ -111,3 +111,10 @@ async def get_or_create_pending(db: AsyncSession, telegram_id: int) -> PendingUs
     await db.commit()
     await db.refresh(user)
     return user
+
+async def get_all_pending(db: AsyncSession) -> Sequence[PendingUser]:
+    result = await db.execute(
+        select(PendingUser)
+    )
+    pus = result.scalars().all()
+    return pus
