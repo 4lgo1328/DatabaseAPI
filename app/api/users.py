@@ -7,7 +7,8 @@ from app.crud.user_crud import (create_user,
                                 get_user,
                                 update_user,
                                 get_all_users,
-                                delete_user, get_or_create_user, get_or_create_pending, increment_notification)
+                                delete_user, get_or_create_user, get_or_create_pending, increment_notification,
+                                get_all_pending)
 from typing import List
 from app.core.security import verify_token, verify_admin_token
 
@@ -95,10 +96,11 @@ async def increment_notification_route(db: AsyncSession = Depends(get_db),
     return result
 
 @router.get("/get-all-pending", response_model=List[PendingUserRead])
-async def get_all_pending(db: AsyncSession = Depends(get_db),
-                          token: str = Header(alias="X-Auth-Token")):
+async def get_all_pending_route(db: AsyncSession = Depends(get_db),
+                                token: str = Header(alias="X-Auth-Token")):
     res = await verify_admin_token(token)
     if res.get("status") != "OK":
         raise HTTPException(status_code=403, detail="Token is invalid")
+
     result = await get_all_pending(db)
     return result
